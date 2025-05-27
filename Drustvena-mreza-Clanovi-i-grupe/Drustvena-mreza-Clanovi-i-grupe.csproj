@@ -8,20 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-<<<<<<< HEAD
     <Compile Remove="data\**" />
     <Content Remove="data\**" />
     <EmbeddedResource Remove="data\**" />
     <None Remove="data\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="DataBase\socialnetwork.db" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="DataBase\socialnetwork.db">
-=======
     <None Remove="DataBase\socialnetwork.db" />
     <None Remove="data\korisnici.csv" />
   </ItemGroup>
@@ -31,7 +21,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="data\korisnici.csv">
->>>>>>> 285cb8fa813cff26d600a0c60ad2ec53d7079336
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
