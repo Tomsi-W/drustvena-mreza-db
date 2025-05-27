@@ -101,7 +101,7 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
         private List<Korisnik> GetAllFromDatabase()
         {
             List<Korisnik> korisnici = new List<Korisnik>();
-            string connectionString = "Data Source=DataBase/database.db";
+            string connectionString = "Data Source=DataBase/socialnetwork.db";
 
             using (SqliteConnection connection = new SqliteConnection(connectionString))
             {
