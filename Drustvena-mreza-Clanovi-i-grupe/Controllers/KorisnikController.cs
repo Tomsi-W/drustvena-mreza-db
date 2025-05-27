@@ -2,6 +2,7 @@
 using Drustvena_mreza_Clanovi_i_grupe.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.Sqlite;
 
 namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
 {
@@ -14,8 +15,15 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
         [HttpGet]
         public ActionResult<List<Korisnik>> GetAll()
         {
-            List<Korisnik> korisnik = korisnikRepo.Data.Values.ToList();
-            return Ok(korisnik);
+            try
+            {
+                List<Korisnik> korisnici = GetAllFromDatabase();
+                return Ok(korisnici);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Greška prilikom dohvatanja korisnika iz baze: {ex.Message}");
+            }
         }
 
         [HttpGet("{id}")]
@@ -88,6 +96,37 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
                 }
             }
             return maxId + 1;
+        }
+
+        private List<Korisnik> GetAllFromDatabase()
+        {
+            List<Korisnik> korisnici = new List<Korisnik>();
+            string connectionString = "Data Source=DataBase/socialnetwork.db";
+
+            using (SqliteConnection connection = new SqliteConnection(connectionString))
+            {
+                connection.Open();
+                SqliteCommand command = connection.CreateCommand();
+                command.CommandText = "SELECT Id, Username, Name, Surname, Birthday FROM Users";
+
+                using (SqliteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Korisnik korisnik = new Korisnik(
+                            reader.GetInt32(0),
+                            reader.GetString(1),
+                            reader.GetString(2),
+                            reader.GetString(3),
+                            DateTime.Parse(reader.GetString(4))
+                        );
+
+                        korisnici.Add(korisnik);
+                    }
+                }
+            }
+
+            return korisnici;
         }
     }
 }
