@@ -275,5 +275,5 @@ __pycache__/
 
 # Isključivanje SQLite baza podataka iz verzionisanja
 *.db
-Data/
+DataBase/
 database/
