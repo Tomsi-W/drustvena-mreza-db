@@ -11,138 +11,101 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
     [Route("api/grupa")]
     public class GrupaController : ControllerBase
     {
-        //Repozitorijumi za grupe i korisnike
-        private readonly GrupaRepository grupaRepo = new GrupaRepository();
-        private readonly KorisnikRepository korisnikRepo = new KorisnikRepository();
+        private readonly GrupaDbRepository grupaRepo = new GrupaDbRepository();
 
         //Dohvatanje svih grupa
         [HttpGet]
         public IActionResult GetAll()
         {
-            var grupe = GetAllFromDataase();
+            var grupe = grupaRepo.GetAll();
             return Ok(grupe);
         }
 
-        //Kreiranje nove grupe
-        [HttpPost]
-        public IActionResult Create([FromBody] Grupa novaGrupa)
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
         {
-            //Generesi novi ID
-            int newId = 1;
-            if (grupaRepo.Data.Any())
+            Grupa grupa = grupaRepo.GetById(id);
+            if(grupa == null)
             {
-                newId = grupaRepo.Data.Keys.Max() + 1;
+                return NotFound("Grupa ne postoji.");
             }
-            novaGrupa.Id = newId;
-
-            if (grupaRepo.Data.ContainsKey(novaGrupa.Id))
-                return BadRequest("Grupa sa datim ID-jem već postoji.");
-
-            grupaRepo.Data[novaGrupa.Id] = novaGrupa;
-            grupaRepo.Save();
-            return Ok(novaGrupa);
+            return Ok(grupa);
         }
+        ////Kreiranje nove grupe
+        //[HttpPost]
+        //public IActionResult Create([FromBody] Grupa novaGrupa)
+        //{
+        //    //Generesi novi ID
+        //    int newId = 1;
+        //    if (grupaRepo.Data.Any())
+        //    {
+        //        newId = grupaRepo.Data.Keys.Max() + 1;
+        //    }
+        //    novaGrupa.Id = newId;
 
-        //Brisanje grupe po ID-ju
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
-        {
-            if (!grupaRepo.Data.ContainsKey(id))
-                return NotFound("Grupa nije pronađena.");
+        //    if (grupaRepo.Data.ContainsKey(novaGrupa.Id))
+        //        return BadRequest("Grupa sa datim ID-jem već postoji.");
 
-            grupaRepo.Data.Remove(id);
-            grupaRepo.Save();
-            return Ok("Grupa je uspešno obrisana.");
-        }
+        //    grupaRepo.Data[novaGrupa.Id] = novaGrupa;
+        //    grupaRepo.Save();
+        //    return Ok(novaGrupa);
+        //}
 
-        //Dodavanje korisnika u grupu
-        [HttpPut("{idGrupe}/korisnici/{idKorisnika}")]
-        public IActionResult AddMember(int idGrupe, int idKorisnika)
-        {
-            if (!grupaRepo.Data.TryGetValue(idGrupe, out var grupa))
-                return NotFound("Grupa nije pronađena.");
+        ////Brisanje grupe po ID-ju
+        //[HttpDelete("{id}")]
+        //public IActionResult Delete(int id)
+        //{
+        //    if (!grupaRepo.Data.ContainsKey(id))
+        //        return NotFound("Grupa nije pronađena.");
 
-            if (!korisnikRepo.Data.TryGetValue(idKorisnika, out var korisnik))
-                return NotFound("Korisnik nije pronađen.");
+        //    grupaRepo.Data.Remove(id);
+        //    grupaRepo.Save();
+        //    return Ok("Grupa je uspešno obrisana.");
+        //}
 
-            if (grupa.Korisnici.Any(k => k.Id == idKorisnika))
-                return BadRequest("Korisnik je već član grupe.");
+        ////Dodavanje korisnika u grupu
+        //[HttpPut("{idGrupe}/korisnici/{idKorisnika}")]
+        //public IActionResult AddMember(int idGrupe, int idKorisnika)
+        //{
+        //    if (!grupaRepo.Data.TryGetValue(idGrupe, out var grupa))
+        //        return NotFound("Grupa nije pronađena.");
 
-            grupa.Korisnici.Add(korisnik);
-            grupaRepo.Save();
-            return Ok("Korisnik je uspešno dodat u grupu.");
-        }
+        //    if (!korisnikRepo.Data.TryGetValue(idKorisnika, out var korisnik))
+        //        return NotFound("Korisnik nije pronađen.");
 
-        //Uklanjanje korisnika iz grupe
-        [HttpDelete("{idGrupe}/korisnici/{idKorisnika}")]
-        public IActionResult RemoveMember(int idGrupe, int idKorisnika)
-        {
-            if (!grupaRepo.Data.TryGetValue(idGrupe, out var grupa))
-                return NotFound("Grupa nije pronađena.");
+        //    if (grupa.Korisnici.Any(k => k.Id == idKorisnika))
+        //        return BadRequest("Korisnik je već član grupe.");
 
-            var korisnik = grupa.Korisnici.FirstOrDefault(k => k.Id == idKorisnika);
-            if (korisnik == null)
-                return BadRequest("Korisnik nije član ove grupe.");
+        //    grupa.Korisnici.Add(korisnik);
+        //    grupaRepo.Save();
+        //    return Ok("Korisnik je uspešno dodat u grupu.");
+        //}
 
-            grupa.Korisnici.Remove(korisnik);
-            grupaRepo.Save();
-            return Ok("Korisnik je uspešno uklonjen iz grupe.");
-        }
-        //dobavljanje korisnika jedne grupe
-        [HttpGet("{id}/korisnik")]
-        public IActionResult GetClanoviGrupe(int id)
-        {
-            if (!grupaRepo.Data.ContainsKey(id))
-                return NotFound("Grupa nije pronađena.");
+        ////Uklanjanje korisnika iz grupe
+        //[HttpDelete("{idGrupe}/korisnici/{idKorisnika}")]
+        //public IActionResult RemoveMember(int idGrupe, int idKorisnika)
+        //{
+        //    if (!grupaRepo.Data.TryGetValue(idGrupe, out var grupa))
+        //        return NotFound("Grupa nije pronađena.");
 
-            return Ok(grupaRepo.Data[id].Korisnici);
-        }
+        //    var korisnik = grupa.Korisnici.FirstOrDefault(k => k.Id == idKorisnika);
+        //    if (korisnik == null)
+        //        return BadRequest("Korisnik nije član ove grupe.");
 
-        //Koriscenje baze podataka
-        private List<Grupa> GetAllFromDataase()
-        {
-            List<Grupa> grupe = new List<Grupa>();
-            string connectionString = "Data Source=DataBase/socialnetwork.db";
+        //    grupa.Korisnici.Remove(korisnik);
+        //    grupaRepo.Save();
+        //    return Ok("Korisnik je uspešno uklonjen iz grupe.");
+        //}
+        ////dobavljanje korisnika jedne grupe
+        //[HttpGet("{id}/korisnik")]
+        //public IActionResult GetClanoviGrupe(int id)
+        //{
+        //    if (!grupaRepo.Data.ContainsKey(id))
+        //        return NotFound("Grupa nije pronađena.");
 
-            try
-            {
-                using (SqliteConnection connection = new SqliteConnection(connectionString))
-                {
-                    connection.Open();
-                    SqliteCommand command = connection.CreateCommand();
+        //    return Ok(grupaRepo.Data[id].Korisnici);
+        //}
 
-                    command.CommandText = "SELECT Id, Name, CreationDate FROM Groups";
-
-                    using (SqliteDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            Grupa grupa = new Grupa(
-                                Convert.ToInt32(reader["Id"]),
-                                reader["Name"].ToString(),
-                                DateTime.Parse(reader["CreationDate"].ToString())
-                                );
-
-                            grupe.Add(grupa);
-                        }
-                    }
-                }
-            }
-            catch (SqliteException e)
-            {
-
-                Console.WriteLine($"Greška pri radu sa bazom: {e.Message}");
-            }
-            catch (FormatException e)
-            {
-                Console.WriteLine($"Greska u konverziji podataka: {e.Message}");
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Neocekivana greska: {e.Message}");
-            }
-
-            return grupe;
-        }
+       
     }
 }
