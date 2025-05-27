@@ -8,16 +8,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="data\korisnici.csv" />
+    <Compile Remove="data\**" />
+    <Content Remove="data\**" />
+    <EmbeddedResource Remove="data\**" />
+    <None Remove="data\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="data\korisnici.csv">
+    <None Remove="DataBase\socialnetwork.db" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="DataBase\socialnetwork.db">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 

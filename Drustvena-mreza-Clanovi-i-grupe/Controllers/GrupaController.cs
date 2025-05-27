@@ -2,6 +2,7 @@
 using Drustvena_mreza_Clanovi_i_grupe.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.Sqlite;
 
 
 namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
@@ -18,7 +19,7 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            var grupe = grupaRepo.Data.Values.ToList();
+            var grupe = GetAllFromDataase();
             return Ok(grupe);
         }
 
@@ -95,6 +96,53 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
                 return NotFound("Grupa nije pronađena.");
 
             return Ok(grupaRepo.Data[id].Korisnici);
+        }
+
+        //Koriscenje baze podataka
+        private List<Grupa> GetAllFromDataase()
+        {
+            List<Grupa> grupe = new List<Grupa>();
+            string connectionString = "Data Source=DataBase/socialnetwork.db";
+
+            try
+            {
+                using (SqliteConnection connection = new SqliteConnection(connectionString))
+                {
+                    connection.Open();
+                    SqliteCommand command = connection.CreateCommand();
+
+                    command.CommandText = "SELECT Id, Name, CreationDate FROM Groups";
+
+                    using (SqliteDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Grupa grupa = new Grupa(
+                                Convert.ToInt32(reader["Id"]),
+                                reader["Name"].ToString(),
+                                DateTime.Parse(reader["CreationDate"].ToString())
+                                );
+
+                            grupe.Add(grupa);
+                        }
+                    }
+                }
+            }
+            catch (SqliteException e)
+            {
+
+                Console.WriteLine($"Greška pri radu sa bazom: {e.Message}");
+            }
+            catch (FormatException e)
+            {
+                Console.WriteLine($"Greska u konverziji podataka: {e.Message}");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Neocekivana greska: {e.Message}");
+            }
+
+            return grupe;
         }
     }
 }
