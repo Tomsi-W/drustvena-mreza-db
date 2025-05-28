@@ -40,5 +40,56 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
                 return StatusCode(500, $"Greška: {ex.Message}");
             }
         }
+        [HttpPost]
+        public IActionResult Create([FromBody] Korisnik noviKorisnik)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(noviKorisnik.KorisnickoIme) || string.IsNullOrWhiteSpace(noviKorisnik.Ime))
+                    return BadRequest("Obavezna polja nisu popunjena.");
+
+                Korisnik kreiraniKorisnik = korisnikRepo.Create(noviKorisnik);
+                return CreatedAtAction(nameof(GetById), new { id = kreiraniKorisnik.Id }, kreiraniKorisnik);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Greška prilikom kreiranja korisnika: {ex.Message}");
+            }
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, [FromBody] Korisnik korisnikZaIzmenu)
+        {
+            try
+            {
+                bool uspesno = korisnikRepo.Update(id, korisnikZaIzmenu);
+                if (!uspesno)
+                    return NotFound($"Korisnik sa ID-jem {id} ne postoji.");
+
+                return Ok("Korisnik je uspešno ažuriran.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Greška prilikom ažuriranja: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            try
+            {
+                bool uspesno = korisnikRepo.Delete(id);
+                if (!uspesno)
+                    return NotFound($"Korisnik sa ID-jem {id} ne postoji.");
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Greška prilikom brisanja: {ex.Message}");
+            }
+        }
+
     }
 }
