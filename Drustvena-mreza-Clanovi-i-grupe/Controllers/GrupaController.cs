@@ -11,12 +11,16 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
     [Route("api/grupa")]
     public class GrupaController : ControllerBase
     {
-        private readonly GrupaDbRepository grupaRepo = new GrupaDbRepository();
+        private readonly GrupaDbRepository grupaRepo;
+        public GrupaController (IConfiguration configuration)
+        {
+            grupaRepo = new GrupaDbRepository(configuration);
+        }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public IActionResult GetAll([FromQuery] int page, [FromQuery] int pageSize)
         {
-            var grupe = grupaRepo.GetAll();
+            List<Grupa> grupe = grupaRepo.GetPaged(page, pageSize);
             return Ok(grupe);
         }
 

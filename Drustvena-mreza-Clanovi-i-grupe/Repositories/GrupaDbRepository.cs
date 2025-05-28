@@ -5,23 +5,32 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Repositories
 {
     public class GrupaDbRepository
     {
-        public List<Grupa> GetAll()
+        private readonly string connectionString;
+
+        public GrupaDbRepository (IConfiguration configuration)
+        {
+            connectionString = configuration["ConnectionString:SQLiteConnection"];
+        }
+
+        public List<Grupa> GetPaged(int page, int pageSize)
         {
             List<Grupa> grupe = new List<Grupa>();
             try
             {
-                using SqliteConnection connection = new SqliteConnection("Data Source=DataBase/socialnetwork.db");
+                using SqliteConnection connection = new SqliteConnection(connectionString);
                 connection.Open();
 
-                string query = "SELECT Id, Name, CreationDate FROM Groups";
+                string query = "SELECT Id, Name, CreationDate FROM Groups LIMIT @PageSize OFFSET @Offset";
                 using SqliteCommand command = new SqliteCommand(query, connection);
+                command.Parameters.AddWithValue("@PageSize", pageSize);
+                command.Parameters.AddWithValue("@Offset", pageSize * (page - 1));
 
                 using SqliteDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
                     grupe.Add(new Grupa(
                         Convert.ToInt32(reader["Id"]),
-                        reader["Name"].ToString(),
+                        Convert.ToString(reader["Name"]),
                         DateTime.Parse(reader["CreationDate"].ToString())
                         ));
                 }
@@ -47,7 +56,7 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Repositories
         {
             try
             {
-                using SqliteConnection connection = new SqliteConnection("Data Source=DataBase/socialnetwork.db");
+                using SqliteConnection connection = new SqliteConnection(connectionString);
                 connection.Open();
 
                 string query = "SELECT Id, Name, CreationDate FROM Groups WHERE Id = @id";
@@ -75,7 +84,7 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Repositories
         {
             try
             {
-                using SqliteConnection connection = new SqliteConnection("Data Source=DataBase/socialnetwork.db");
+                using SqliteConnection connection = new SqliteConnection(connectionString);
                 connection.Open();
 
                 string query = "INSERT INTO Groups (Name,CreationDate) VALUES (@Ime, @DatumOsnivanja); SELECT last_insert_rowid();";
@@ -97,7 +106,7 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Repositories
         {
             try
             {
-                using SqliteConnection connection = new SqliteConnection("Data Source=DataBase/socialnetwork.db");
+                using SqliteConnection connection = new SqliteConnection(connectionString);
                 connection.Open();
 
                 string query = "UPDATE Groups SET Name = @Ime, CreationDate = @DatumOsnivanja WHERE Id = @Id";
@@ -135,7 +144,7 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Repositories
         {
             try
             {
-                using SqliteConnection connection = new SqliteConnection("Data Source=DataBase/socialnetwork.db");
+                using SqliteConnection connection = new SqliteConnection(connectionString);
                 connection.Open();
 
                 string query = "DELETE FROM Groups WHERE Id = @Id";
