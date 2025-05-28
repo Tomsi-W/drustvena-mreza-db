@@ -12,6 +12,10 @@
         public string Prezime { get; set; }
         public DateTime DatumRodjenja { get; set; }
 
+        public Korisnik()
+        {
+        }
+
         public Korisnik(int id, string korisnickoIme, string ime, string prezime, DateTime datumRodjenja)
         {
             Id = id;
