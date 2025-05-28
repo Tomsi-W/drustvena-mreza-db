@@ -67,8 +67,92 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Repositories
             }
             catch (Exception ex)
             {
-                return null;
                 Console.WriteLine($"Neocekivana greska: {ex.Message}");
+                return null;
+            }
+        }
+        public Grupa Create(Grupa grupa)
+        {
+            try
+            {
+                using SqliteConnection connection = new SqliteConnection("Data Source=DataBase/socialnetwork.db");
+                connection.Open();
+
+                string query = "INSERT INTO Groups (Name,CreationDate) VALUES (@Ime, @DatumOsnivanja); SELECT last_insert_rowid();";
+                using SqliteCommand command = new SqliteCommand(query, connection);
+                command.Parameters.AddWithValue("@Ime", grupa.Ime);
+                command.Parameters.AddWithValue("@DatumOsnivanja", grupa.DatumOsnivanja.ToString("yyyy-MM-dd"));
+
+                grupa.Id = Convert.ToInt32(command.ExecuteScalar());
+                return grupa;
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("Greska pri dodavanju grupe:" + e.Message);
+                throw;
+            }
+        }
+
+        public int Update( int grupaId, Grupa grupa)
+        {
+            try
+            {
+                using SqliteConnection connection = new SqliteConnection("Data Source=DataBase/socialnetwork.db");
+                connection.Open();
+
+                string query = "UPDATE Groups SET Name = @Ime, CreationDate = @DatumOsnivanja WHERE Id = @Id";
+                using SqliteCommand command = new SqliteCommand(query, connection);
+                command.Parameters.AddWithValue("@Id", grupaId);
+                command.Parameters.AddWithValue("@Ime", grupa.Ime);
+                command.Parameters.AddWithValue("@DatumOsnivanja", grupa.DatumOsnivanja);
+
+                return command.ExecuteNonQuery();
+            }
+            catch (SqliteException ex)
+            {
+                Console.WriteLine($"Greska pri izvrsavanju SQL upita: {ex.Message}");
+                throw;
+            }
+            catch (FormatException ex)
+            {
+                Console.WriteLine($"Greska u konverziji datuma: {ex.Message}");
+                throw;
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine($"Greska u radu sa konekcijom: {ex.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Neocekivana greska: {ex.Message}");
+                throw;
+            }
+
+        }
+
+        public int Delete(int grupaId )
+        {
+            try
+            {
+                using SqliteConnection connection = new SqliteConnection("Data Source=DataBase/socialnetwork.db");
+                connection.Open();
+
+                string query = "DELETE FROM Groups WHERE Id = @Id";
+                using SqliteCommand command = new SqliteCommand(query, connection);
+                command.Parameters.AddWithValue("@Id", grupaId);
+
+                return command.ExecuteNonQuery();
+            }
+            catch (SqliteException ex)
+            {
+                Console.WriteLine($"Greska pri brisanju grupe: {ex.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Neosekivana greska: {ex.Message}");
+                throw;
             }
         }
     }
