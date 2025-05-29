@@ -164,5 +164,39 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Repositories
                 throw;
             }
         }
+
+        public int CountAll()
+        {
+            try
+            {
+                using SqliteConnection connection = new SqliteConnection(connectionString);
+                connection.Open();
+
+                string query = "SELECT COUNT(*) AS Count FROM Groups";
+                using SqliteCommand command = new SqliteCommand(query, connection);
+                int totalCount = Convert.ToInt32(command.ExecuteScalar());
+                return totalCount;
+            }
+            catch (SqliteException ex)
+            {
+                Console.WriteLine("Greska prilikom brojanja grupa:" + ex.Message);
+                throw;
+            }
+            catch (FormatException ex)
+            {
+                Console.WriteLine($"Greska u konverziji podataka iz baze: {ex.Message}");
+                throw;
+            }
+            catch (InvalidOperationException ex)
+            {
+                Console.WriteLine($"Konekcija nije otvorena ili je otvorena vise puta: {ex.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Neocekivana greska: {ex.Message}");
+                throw;
+            }
+        }
     }
 }

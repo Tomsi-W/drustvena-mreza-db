@@ -18,10 +18,32 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAll([FromQuery] int page, [FromQuery] int pageSize)
+        public IActionResult GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            List<Grupa> grupe = grupaRepo.GetPaged(page, pageSize);
-            return Ok(grupe);
+            if(page < 1 || pageSize < 1)
+            {
+                return BadRequest("Page i PageSIze moraju biti veci od nule.");
+            }
+            try
+            {
+                List<Grupa> grupe = grupaRepo.GetPaged(page, pageSize);
+                int totalCount = grupaRepo.CountAll();
+                if(grupe == null)
+                {
+                    return NotFound("Ne postoji nijedna grupa.");
+                }
+                Object result = new
+                {
+                    Data = grupe,
+                    TotalCount = totalCount
+                };
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+
+                return Problem("Došlo je do greške prilikom dohvatanja grupa.");
+            }
         }
 
         [HttpGet("{id}")]
