@@ -1,3 +1,4 @@
+using Drustvena_mreza_Clanovi_i_grupe.Repositories;
 
 namespace Drustvena_mreza_Clanovi_i_grupe
 {
@@ -20,15 +21,16 @@ namespace Drustvena_mreza_Clanovi_i_grupe
             });
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddScoped<KorisnikRepository>();
+            builder.Services.AddScoped<GrupaRepository>();
 
             var app = builder.Build();
 
             app.UseCors("AllowAllOrigins");
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -36,7 +38,6 @@ namespace Drustvena_mreza_Clanovi_i_grupe
             }
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 

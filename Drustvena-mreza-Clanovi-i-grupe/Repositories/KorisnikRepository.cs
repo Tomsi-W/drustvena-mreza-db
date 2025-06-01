@@ -1,46 +1,64 @@
 ﻿using Drustvena_mreza_Clanovi_i_grupe.Models;
+using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
 
 namespace Drustvena_mreza_Clanovi_i_grupe.Repositories
 {
     public class KorisnikRepository
     {
-        private const string filePath = "data/korisnici.csv";
-        public Dictionary<int, Korisnik> Data { get; set; }
+        private readonly string _connectionString;
 
-        public KorisnikRepository()
+        public KorisnikRepository(IConfiguration configuration)
         {
-            Data = new Dictionary<int, Korisnik>();
-            Load();
+            _connectionString = configuration.GetConnectionString("SQLiteConnection")!;
         }
 
-        private void Load()
+        public List<Korisnik> GetAll(int page, int pageSize)
         {
-            if (!File.Exists(filePath))
-                return;
-
-            string[] lines = File.ReadAllLines(filePath);
-            foreach (string line in lines)
+            try
             {
-                string[] attributes = line.Split(',');
-                int id = int.Parse(attributes[0]);
-                string korisnickoIme = attributes[1];
-                string ime = attributes[2];
-                string prezime = attributes[3];
-                DateTime datumRodjenja = DateTime.Parse(attributes[4]);
+                if (page < 1 || pageSize < 1)
+                {
+                    throw new ArgumentException("Page and pageSize must be greater than 0.");
+                }
 
-                Korisnik korisnik = new Korisnik(id, korisnickoIme, ime, prezime, datumRodjenja);
-                Data[id] = korisnik;
+                List<Korisnik> korisnici = new List<Korisnik>();
+                using (SqliteConnection connection = new SqliteConnection(_connectionString))
+                {
+                    connection.Open();
+
+                    SqliteCommand command = connection.CreateCommand();
+                    command.CommandText = @"
+                        SELECT Id, Username, Name, Surname, Birthday
+                        FROM Users
+                        LIMIT @pageSize OFFSET @offset";
+
+                    command.Parameters.AddWithValue("@pageSize", pageSize);
+                    command.Parameters.AddWithValue("@offset", (page - 1) * pageSize);
+
+                    using (SqliteDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Korisnik korisnik = new Korisnik
+                            {
+                                Id = reader.GetInt32(0),
+                                KorisnickoIme = reader.GetString(1), // Username
+                                Ime = reader.GetString(2),           // Name
+                                Prezime = reader.GetString(3),       // Surname
+                                DatumRodjenja = reader.GetDateTime(4) // Birthday
+                            };
+                            korisnici.Add(korisnik);
+                        }
+                    }
+                }
+                return korisnici;
             }
-        }
-
-        public void Save()
-        {
-            List<string> lines = new List<string>();
-            foreach (Korisnik k in Data.Values)
+            catch (Exception ex)
             {
-                lines.Add($"{k.Id},{k.KorisnickoIme},{k.Ime},{k.Prezime},{k.DatumRodjenja:yyyy-MM-dd}");
+                throw new Exception("Database error in GetAll", ex);
             }
-            File.WriteAllLines(filePath, lines);
         }
     }
 }
