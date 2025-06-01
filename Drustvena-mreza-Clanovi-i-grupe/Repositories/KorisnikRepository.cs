@@ -44,10 +44,10 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Repositories
                             Korisnik korisnik = new Korisnik
                             {
                                 Id = reader.GetInt32(0),
-                                KorisnickoIme = reader.GetString(1), // Username
-                                Ime = reader.GetString(2),           // Name
-                                Prezime = reader.GetString(3),       // Surname
-                                DatumRodjenja = reader.GetDateTime(4) // Birthday
+                                KorisnickoIme = reader.GetString(1),
+                                Ime = reader.GetString(2),
+                                Prezime = reader.GetString(3),
+                                DatumRodjenja = reader.GetDateTime(4)
                             };
                             korisnici.Add(korisnik);
                         }
@@ -58,6 +58,142 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Repositories
             catch (Exception ex)
             {
                 throw new Exception("Database error in GetAll", ex);
+            }
+        }
+
+        public int CountAll()
+        {
+            try
+            {
+                using (SqliteConnection connection = new SqliteConnection(_connectionString))
+                {
+                    connection.Open();
+                    SqliteCommand command = connection.CreateCommand();
+                    command.CommandText = "SELECT COUNT(*) FROM Users";
+
+                    return Convert.ToInt32(command.ExecuteScalar());
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Database error in CountAll", ex);
+            }
+        }
+
+        public Korisnik? GetById(int id)
+        {
+            try
+            {
+                using (SqliteConnection connection = new SqliteConnection(_connectionString))
+                {
+                    connection.Open();
+                    SqliteCommand command = connection.CreateCommand();
+                    command.CommandText = @"
+                        SELECT Id, Username, Name, Surname, Birthday
+                        FROM Users
+                        WHERE Id = @id";
+
+                    command.Parameters.AddWithValue("@id", id);
+
+                    using (SqliteDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return new Korisnik
+                            {
+                                Id = reader.GetInt32(0),
+                                KorisnickoIme = reader.GetString(1),
+                                Ime = reader.GetString(2),
+                                Prezime = reader.GetString(3),
+                                DatumRodjenja = reader.GetDateTime(4)
+                            };
+                        }
+                    }
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Database error in GetById", ex);
+            }
+        }
+
+        public Korisnik Create(Korisnik korisnik)
+        {
+            try
+            {
+                using (SqliteConnection connection = new SqliteConnection(_connectionString))
+                {
+                    connection.Open();
+                    SqliteCommand command = connection.CreateCommand();
+                    command.CommandText = @"
+                        INSERT INTO Users (Username, Name, Surname, Birthday)
+                        VALUES (@Username, @Name, @Surname, @Birthday);
+                        SELECT last_insert_rowid();";
+
+                    command.Parameters.AddWithValue("@Username", korisnik.KorisnickoIme);
+                    command.Parameters.AddWithValue("@Name", korisnik.Ime);
+                    command.Parameters.AddWithValue("@Surname", korisnik.Prezime);
+                    command.Parameters.AddWithValue("@Birthday", korisnik.DatumRodjenja);
+
+                    korisnik.Id = Convert.ToInt32(command.ExecuteScalar());
+                }
+                return korisnik;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Database error in Create", ex);
+            }
+        }
+
+        public bool Update(int id, Korisnik korisnik)
+        {
+            try
+            {
+                using (SqliteConnection connection = new SqliteConnection(_connectionString))
+                {
+                    connection.Open();
+                    SqliteCommand command = connection.CreateCommand();
+                    command.CommandText = @"
+                        UPDATE Users
+                        SET Username = @Username, Name = @Name, Surname = @Surname, Birthday = @Birthday
+                        WHERE Id = @id";
+
+                    command.Parameters.AddWithValue("@Username", korisnik.KorisnickoIme);
+                    command.Parameters.AddWithValue("@Name", korisnik.Ime);
+                    command.Parameters.AddWithValue("@Surname", korisnik.Prezime);
+                    command.Parameters.AddWithValue("@Birthday", korisnik.DatumRodjenja);
+                    command.Parameters.AddWithValue("@id", id);
+
+                    int affectedRows = command.ExecuteNonQuery();
+                    return affectedRows > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Database error in Update", ex);
+            }
+        }
+
+        public bool Delete(int id)
+        {
+            try
+            {
+                using (SqliteConnection connection = new SqliteConnection(_connectionString))
+                {
+                    connection.Open();
+                    SqliteCommand command = connection.CreateCommand();
+                    command.CommandText = "DELETE FROM Users WHERE Id = @id";
+
+                    command.Parameters.AddWithValue("@id", id);
+
+                    int affectedRows = command.ExecuteNonQuery();
+                    return affectedRows > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Database error in Delete", ex);
             }
         }
     }
