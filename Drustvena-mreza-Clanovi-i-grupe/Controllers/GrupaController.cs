@@ -107,5 +107,16 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
             }
         }
 
+        [HttpGet("{id}/korisnici")]
+        public IActionResult GetGroupWithMembers(int id)
+        {
+            Grupa grupa = grupaRepo.GetGroupWithMembers(id);
+            if(grupa == null)
+            {
+                return NotFound("Grupa nije pronadjena.");
+            }
+            return Ok(grupa);
+        }
+
     }
 }

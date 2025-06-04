@@ -198,5 +198,56 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Repositories
                 throw;
             }
         }
+        public Grupa? GetGroupWithMembers (int grupaId)
+        {
+            Grupa? grupa = null;
+            try
+            {
+                using SqliteConnection connection = new SqliteConnection(connectionString);
+                connection.Open();
+
+                string query = @"
+                    SELECT
+                        g.Id AS GroupId, g.Name AS GroupName, g.CreationDate,
+                        u.Id AS UserId, u.Username AS UserUsername, u.Name AS UserFirstName, u.Surname AS UserLastName, u.Birthday AS UserBirthday
+                    From Groups g
+                    LEFT JOIN GroupMemberships gm ON g.Id = gm.GroupId
+                    LEFT JOIN Users u ON gm.UserId = u.Id
+                    WHERE g.Id = @GroupId";
+
+                using SqliteCommand command = new SqliteCommand(query, connection);
+                command.Parameters.AddWithValue("@GroupId", grupaId);
+
+                using SqliteDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    if(grupa == null)
+                    {
+                        grupa = new Grupa(
+                            Convert.ToInt32(reader["GroupId"]),
+                            Convert.ToString(reader["GroupName"]),
+                            DateTime.Parse(reader["CreationDate"].ToString())
+                        );
+                    }
+                    if (!reader.IsDBNull(reader.GetOrdinal("UserId")))
+                    {
+                        Korisnik korisnik = new Korisnik(
+                            Convert.ToInt32(reader["UserId"]),
+                            reader["UserUsername"].ToString(),
+                            reader["UserFirstName"].ToString(),
+                            reader["UserLastName"].ToString(),
+                            DateTime.Parse(reader["UserBirthday"].ToString())
+                        );
+                        grupa.Korisnici.Add(korisnik);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Greska prilikom dobijanja grupe sa korisnicima: {e.Message}");
+
+            }
+            return grupa;
+        }
     }
 }
