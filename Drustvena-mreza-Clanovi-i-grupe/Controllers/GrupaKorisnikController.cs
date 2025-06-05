@@ -57,6 +57,23 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
             {
                 return StatusCode(500, $"Greška: {ex.Message}"); 
             }
-        } 
+        }
+
+        [HttpDelete("{korisnikId}")]
+        public IActionResult UkloniKorisnikaIzGrupe(int grupaId, int korisnikId)
+        {
+            try
+            {
+                int rezultat = _membershipRepository.RemoveUserFromGroup(korisnikId, grupaId);
+                if (rezultat == 0)
+                    return NotFound("Korisnik nije pronađen u grupi.");
+
+                return Ok("Korisnik je uspešno uklonjen iz grupe.");
+            }
+            catch
+            {
+                return StatusCode(500, "Greška prilikom uklanjanja korisnika iz grupe.");
+            }
+        }
     }
 }

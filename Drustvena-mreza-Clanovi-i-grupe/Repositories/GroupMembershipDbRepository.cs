@@ -46,5 +46,26 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Repositories
                 throw;
             }
         }
+
+        public int RemoveUserFromGroup(int userId, int groupId)
+        {
+            try
+            {
+                using SqliteConnection connection = new SqliteConnection(connectionString);
+                connection.Open();
+
+                string query = "DELETE FROM GroupMemberships WHERE UserId = @UserId AND GroupId = @GroupId";
+                using SqliteCommand command = new SqliteCommand(query, connection);
+                command.Parameters.AddWithValue("@UserId", userId);
+                command.Parameters.AddWithValue("@GroupId", groupId);
+
+                return command.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Greska prilikom izbacivanja korisnika iz grupe: {e.Message}");
+                throw;
+            }
+        }
     }
 }
