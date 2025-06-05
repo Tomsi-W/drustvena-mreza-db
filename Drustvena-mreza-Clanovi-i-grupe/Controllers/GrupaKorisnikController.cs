@@ -1,6 +1,7 @@
 ﻿using Drustvena_mreza_Clanovi_i_grupe.Models;
 using Drustvena_mreza_Clanovi_i_grupe.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 
 namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
@@ -11,12 +12,14 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
     {
         private readonly KorisnikRepository _korisnikRepository;
         private readonly GrupaRepository _grupaRepository;
+        private readonly GroupMembershipDbRepository _membershipRepository;
 
         // Dependency Injection constructor
-        public GrupaKorisnikController(KorisnikRepository korisnikRepository, GrupaRepository grupaRepository)
+        public GrupaKorisnikController(KorisnikRepository korisnikRepository, GrupaRepository grupaRepository, GroupMembershipDbRepository membershipRepository)
         {
             _korisnikRepository = korisnikRepository;
             _grupaRepository = grupaRepository;
+            _membershipRepository = membershipRepository;
         }
 
         [HttpGet]
@@ -35,8 +38,25 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, "Greška prilikom dohvatanja članova grupe.");
+                return StatusCode(500, $"Greška prilikom dohvatanja članova grupe.");
             }
         }
+
+        [HttpPut("{korisnikId}")]
+        public IActionResult DodajKorisnikaUGrupu(int grupaId, int korisnikId)
+        {
+            try
+            {
+                int rezultat = _membershipRepository.AddUserToGroup(korisnikId, grupaId);
+                if (rezultat == 0)
+                    return BadRequest("Dodavanje korisnika u grupu nije uspelo.");
+
+                return Ok("Korisnik je uspesno dodat u grupu.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Greška: {ex.Message}"); 
+            }
+        } 
     }
 }

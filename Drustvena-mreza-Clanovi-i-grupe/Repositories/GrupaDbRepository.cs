@@ -198,7 +198,7 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Repositories
                 throw;
             }
         }
-        public Grupa? GetGroupWithMembers (int grupaId)
+        public Grupa? GetGroupWithMembers(int grupaId)
         {
             Grupa? grupa = null;
             try
@@ -221,7 +221,7 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Repositories
                 using SqliteDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    if(grupa == null)
+                    if (grupa == null)
                     {
                         grupa = new Grupa(
                             Convert.ToInt32(reader["GroupId"]),
