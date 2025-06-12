@@ -28,6 +28,7 @@ namespace Drustvena_mreza_Clanovi_i_grupe
             builder.Services.AddScoped<KorisnikDbRepository>();
             builder.Services.AddScoped<GrupaDbRepository>();
             builder.Services.AddScoped<GroupMembershipDbRepository>();
+            builder.Services.AddScoped<PostDbRepository>();
 
             var app = builder.Build();
 
