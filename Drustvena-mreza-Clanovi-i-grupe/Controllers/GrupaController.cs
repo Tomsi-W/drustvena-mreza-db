@@ -11,10 +11,10 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
     [Route("api/grupa")]
     public class GrupaController : ControllerBase
     {
-        private readonly GrupaDbRepository grupaRepo;
-        public GrupaController (IConfiguration configuration)
+        private readonly GrupaDbRepository _grupaRepo;
+        public GrupaController (GrupaDbRepository grupaRepo)
         {
-            grupaRepo = new GrupaDbRepository(configuration);
+            _grupaRepo = grupaRepo;
         }
 
         [HttpGet]
@@ -26,8 +26,8 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
             }
             try
             {
-                List<Grupa> grupe = grupaRepo.GetPaged(page, pageSize);
-                int totalCount = grupaRepo.CountAll();
+                List<Grupa> grupe = _grupaRepo.GetPaged(page, pageSize);
+                int totalCount = _grupaRepo.CountAll();
                 if(grupe == null)
                 {
                     return NotFound("Ne postoji nijedna grupa.");
@@ -49,7 +49,7 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            Grupa grupa = grupaRepo.GetById(id);
+            Grupa grupa = _grupaRepo.GetById(id);
             if(grupa == null)
             {
                 return NotFound("Grupa ne postoji.");
@@ -62,7 +62,7 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
         {
             try
             {
-                Grupa kreiranaGrupa = grupaRepo.Create(novaGrupa);
+                Grupa kreiranaGrupa = _grupaRepo.Create(novaGrupa);
                 return Ok(kreiranaGrupa);
             }
             catch (Exception ex)
@@ -77,7 +77,7 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
         {
             try
             {
-                int obrisano = grupaRepo.Delete(id);
+                int obrisano = _grupaRepo.Delete(id);
                 if(obrisano == 0)
                 {
                     return NotFound("Grupa nije pornadjena.");
@@ -96,7 +96,7 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
         {
             try
             {
-                int izmenjeno = grupaRepo.Update(id, azuriranaGrupa);
+                int izmenjeno = _grupaRepo.Update(id, azuriranaGrupa);
                 if (izmenjeno == 0)
                     return NotFound("Grupa sa datim ID-jem ne postoji.");
                 return Ok("Grupa je uspešno ažurirana.");
@@ -110,7 +110,7 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
         [HttpGet("{id}/korisnici")]
         public IActionResult GetGroupWithMembers(int id)
         {
-            Grupa grupa = grupaRepo.GetGroupWithMembers(id);
+            Grupa grupa = _grupaRepo.GetGroupWithMembers(id);
             if(grupa == null)
             {
                 return NotFound("Grupa nije pronadjena.");

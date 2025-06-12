@@ -9,9 +9,9 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
     [ApiController]
     public class KorisnikController : ControllerBase
     {
-        private readonly KorisnikRepository _korisnikRepository;
+        private readonly KorisnikDbRepository _korisnikRepository;
 
-        public KorisnikController(KorisnikRepository korisnikRepository)
+        public KorisnikController(KorisnikDbRepository korisnikRepository)
         {
             _korisnikRepository = korisnikRepository;
         }
@@ -42,10 +42,11 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Controllers
 
                 return Ok(result);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "Greška prilikom dohvatanja korisnika.");
+                return StatusCode(500, $"Greška prilikom dohvatanja korisnika: {ex.Message}");
             }
+
         }
 
         [HttpGet("{id}")]

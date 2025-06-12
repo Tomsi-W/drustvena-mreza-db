@@ -11,7 +11,7 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Repositories
 
         public KorisnikRepository(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("SQLiteConnection")!;
+            _connectionString = configuration["ConnectionString:SQLiteConnection"];
         }
 
         public List<Korisnik> GetAll(int page, int pageSize)
@@ -47,7 +47,7 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Repositories
                                 KorisnickoIme = reader.GetString(1),
                                 Ime = reader.GetString(2),
                                 Prezime = reader.GetString(3),
-                                DatumRodjenja = reader.GetDateTime(4)
+                                DatumRodjenja = DateTime.Parse(reader.GetString(4))
                             };
                             korisnici.Add(korisnik);
                         }
@@ -57,28 +57,13 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Repositories
             }
             catch (Exception ex)
             {
-                throw new Exception("Database error in GetAll", ex);
+                Console.WriteLine("GetAll greška: " + ex.Message);
+                throw;
             }
+
         }
 
-        public int CountAll()
-        {
-            try
-            {
-                using (SqliteConnection connection = new SqliteConnection(_connectionString))
-                {
-                    connection.Open();
-                    SqliteCommand command = connection.CreateCommand();
-                    command.CommandText = "SELECT COUNT(*) FROM Users";
-
-                    return Convert.ToInt32(command.ExecuteScalar());
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Database error in CountAll", ex);
-            }
-        }
+        
 
         public Korisnik? GetById(int id)
         {

@@ -7,9 +7,14 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Repositories
 {
     public class KorisnikDbRepository
     {
-        private readonly string _connectionString = "Data Source=DataBase/socialnetwork.db";
+        private readonly string _connectionString;
 
-        public List<Korisnik> GetAll()
+        public KorisnikDbRepository(IConfiguration configuration)
+        {
+            _connectionString = configuration["ConnectionString:SQLiteConnection"];
+        }
+
+        public List<Korisnik> GetAll(int page, int pageSize)
         {
             List<Korisnik> korisnici = new List<Korisnik>();
             try
@@ -142,6 +147,24 @@ namespace Drustvena_mreza_Clanovi_i_grupe.Repositories
             connection.Close();
 
             return affectedRows > 0;
+        }
+        public int CountAll()
+        {
+            try
+            {
+                using (SqliteConnection connection = new SqliteConnection(_connectionString))
+                {
+                    connection.Open();
+                    SqliteCommand command = connection.CreateCommand();
+                    command.CommandText = "SELECT COUNT(*) FROM Users";
+
+                    return Convert.ToInt32(command.ExecuteScalar());
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Database error in CountAll", ex);
+            }
         }
     }
 }

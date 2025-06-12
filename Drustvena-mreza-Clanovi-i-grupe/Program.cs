@@ -1,4 +1,4 @@
-using Drustvena_mreza_Clanovi_i_grupe.Repositories;
+﻿using Drustvena_mreza_Clanovi_i_grupe.Repositories;
 
 namespace Drustvena_mreza_Clanovi_i_grupe
 {
@@ -7,6 +7,7 @@ namespace Drustvena_mreza_Clanovi_i_grupe
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
 
             // Add services to the container.
             builder.Services.AddCors(options =>
@@ -24,8 +25,8 @@ namespace Drustvena_mreza_Clanovi_i_grupe
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddScoped<KorisnikRepository>();
-            builder.Services.AddScoped<GrupaRepository>();
+            builder.Services.AddScoped<KorisnikDbRepository>();
+            builder.Services.AddScoped<GrupaDbRepository>();
             builder.Services.AddScoped<GroupMembershipDbRepository>();
 
             var app = builder.Build();
